@@ -62,17 +62,57 @@ $ python tasks.py help # Show usage
 $ python tasks.py report # Statistics"""
         )
 
-    def add(self, args):
-        pass
+    def add(self, args, shifted = False):
+        priority,task = int(args[0]), args[1]
+        if priority in self.current_items.keys():
+            #Priority already exists
+            already = self.current_items[priority]
+            self.current_items[priority] = task
+            newPriority = priority+1
+            self.add([newPriority, already], True)
+            
+        else :
+            #Priority does not exist
+            self.current_items[priority] = task
+            self.write_current()
+
+        if shifted == False :
+            print(f"Added task: \"{task}\" with priority {str(priority)}")
+        
 
     def done(self, args):
-        pass
+        priority = int(args[0])
+        if priority in self.current_items.keys() :
+            self.completed_items.append(self.current_items[priority])
+            del self.current_items[priority]
+            print('Marked item as done.')
+        else :
+            print(f"Error: no incomplete item with priority {priority} exists.")
+        
+        self.write_completed()
+        self.write_current()
 
     def delete(self, args):
-        pass
+        priority = int(args[0])
+        if priority in self.current_items.keys() :
+            del self.current_items[priority]
+            print(f"Deleted item with priority {priority}")
+        else :
+            print(f"Error: item with priority {priority} does not exist. Nothing deleted.")
+        
+        self.write_current()
 
     def ls(self):
-        pass
+        i = 0
+        for task in self.current_items:
+            i+=1
+            print(f"{i}. {self.current_items[task]} [{task}]")
+
 
     def report(self):
-        pass
+        print(f"Pending : {len(self.current_items)}")
+        self.ls()
+        print(f"\nCompleted : {len(self.completed_items)}")
+        i = 0
+        for i in range(len(self.completed_items)):
+            print(f"{i+1}. {self.completed_items[i]}")
